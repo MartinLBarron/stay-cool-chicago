@@ -1,0 +1,1 @@
+Keep a document called JOURNAL.md that keeps a running transcript of my prompts and your responses.

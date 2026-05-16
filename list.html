@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title data-i18n-title="appName">Stay Cool Chicago</title>
+  <meta name="description" content="All Chicago cooling centers, sorted by distance." />
+  <meta name="theme-color" content="#0a2a55" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/png" href="/assets/icons/favicon-32.png" sizes="32x32" />
+  <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png" />
+  <link rel="stylesheet" href="css/main.css" />
+  <style>
+    .filter-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px var(--page-pad);
+      border-bottom: 1px solid var(--color-hair);
+    }
+    .filter-label {
+      font-size: 0.8125rem;
+      font-weight: 700;
+      color: var(--color-ink-mute);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .filter-select {
+      flex: 1;
+      height: 44px;
+      padding: 0 12px;
+      border: 1.5px solid var(--color-hair);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      font-size: 0.9375rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 7L11 1' stroke='%230a2a55' stroke-width='1.8' stroke-linecap='square'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 36px;
+    }
+    .filter-select:focus-visible {
+      outline: 3px solid var(--color-ink);
+      outline-offset: 2px;
+    }
+
+    .list-meta {
+      padding: 10px var(--page-pad);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--color-ink-mute);
+      border-bottom: 1px solid var(--color-hair);
+    }
+
+    .no-results {
+      padding: 48px var(--page-pad);
+      text-align: center;
+      color: var(--color-ink-mute);
+      font-size: 0.9375rem;
+    }
+
+    .filter-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 44px;
+      padding: 0 14px;
+      border: 1.5px solid var(--color-hair);
+      background: var(--color-paper);
+      color: var(--color-ink-mute);
+      font-size: 0.875rem;
+      font-weight: 700;
+      font-family: inherit;
+      white-space: nowrap;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .filter-toggle.is-active {
+      background: var(--color-ink);
+      border-color: var(--color-ink);
+      color: var(--color-on-ink);
+    }
+    .filter-toggle .open-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-open-dot);
+      flex-shrink: 0;
+    }
+    .filter-toggle.is-active .open-dot {
+      background: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <div class="page">
+    <div id="advisory-container" hidden></div>
+
+    <header class="page-header" style="padding:12px var(--page-pad);border-bottom:1px solid var(--color-hair);">
+      <a class="brand-mark" href="index.html" aria-label="Stay Cool Chicago — home">
+        <svg width="22" height="22" viewBox="0 0 28 28" aria-hidden="true" focusable="false">
+          <rect x="2" y="2" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"/>
+          <circle cx="14" cy="14" r="5" fill="none" stroke="currentColor" stroke-width="2"/>
+          <line x1="14" y1="4"  x2="14" y2="7"  stroke="currentColor" stroke-width="2" stroke-linecap="square"/>
+          <line x1="14" y1="21" x2="14" y2="24" stroke="currentColor" stroke-width="2" stroke-linecap="square"/>
+          <line x1="4"  y1="14" x2="7"  y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="square"/>
+          <line x1="21" y1="14" x2="24" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="square"/>
+        </svg>
+        <span class="brand-name" data-i18n="appName">Stay Cool Chicago</span>
+      </a>
+      <button class="lang-toggle" id="lang-toggle" style="margin-left:auto;" aria-label="Switch language">
+        <span data-i18n="langToggle">Español</span>
+      </button>
+    </header>
+
+    <main id="main">
+
+      <!-- Page title -->
+      <div style="padding:20px var(--page-pad) 12px;">
+        <h1 style="font-size:1.5rem;font-weight:800;letter-spacing:-0.02em;"
+            data-i18n="listTitle">All cooling centers</h1>
+        <a href="map.html" class="btn btn-primary"
+           style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;font-size:0.9375rem;"
+           aria-label="View map">
+          <svg width="16" height="16" viewBox="0 0 22 22" fill="none" aria-hidden="true" focusable="false">
+            <path d="M2 5 L8 3 L14 5 L20 3 V17 L14 19 L8 17 L2 19 Z"
+                  stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+            <line x1="8"  y1="3"  x2="8"  y2="17" stroke="currentColor" stroke-width="1.8"/>
+            <line x1="14" y1="5"  x2="14" y2="19" stroke="currentColor" stroke-width="1.8"/>
+          </svg>
+          <span data-i18n="viewMapBtn">View map</span>
+        </a>
+      </div>
+
+      <!-- Loading -->
+      <div id="list-loading" style="padding:48px var(--page-pad);text-align:center;"
+           role="status" aria-live="polite">
+        <p style="color:var(--color-ink-mute);font-size:0.9375rem;">Loading centers…</p>
+      </div>
+
+      <!-- Content -->
+      <div id="list-content" hidden>
+
+        <!-- Filters -->
+        <div class="filter-row">
+          <label class="filter-label" for="type-filter">Type</label>
+          <select id="type-filter" class="filter-select" aria-label="Filter by center type">
+            <!-- populated by JS -->
+          </select>
+          <button id="open-toggle" class="filter-toggle" aria-pressed="false">
+            <span class="open-dot" aria-hidden="true" hidden></span>
+            <span id="open-toggle-label">All centers</span>
+          </button>
+        </div>
+
+        <!-- Sort / count metadata -->
+        <div class="list-meta" id="list-meta" aria-live="polite"></div>
+
+        <!-- Center rows -->
+        <div id="center-list" role="list"></div>
+
+        <!-- Pagination -->
+        <div id="pagination" hidden
+             style="display:flex;align-items:center;justify-content:space-between;
+                    padding:16px var(--page-pad);border-top:1px solid var(--color-hair);">
+          <button id="btn-prev" class="btn btn-secondary"
+                  style="min-width:100px;justify-content:center;" aria-label="Previous page">
+            ← Previous
+          </button>
+          <span id="page-label"
+                style="font-size:0.8125rem;font-weight:600;color:var(--color-ink-mute);"></span>
+          <button id="btn-next" class="btn btn-secondary"
+                  style="min-width:100px;justify-content:center;" aria-label="Next page">
+            Next →
+          </button>
+        </div>
+
+        <!-- No results -->
+        <div id="no-results" hidden class="no-results">
+          <span data-i18n="noResults">No centers match that filter.</span>
+        </div>
+
+        <!-- Footer -->
+        <footer class="site-footer">
+          <a href="/about.html" data-i18n="aboutLink">A neighbor-built service</a>
+          &nbsp;·&nbsp;
+          <a href="https://data.cityofchicago.org/Health-Human-Services/Cooling-Centers-Map/cj7n-sh49"
+             target="_blank" rel="noopener noreferrer"
+             data-i18n="cityDataLink">City of Chicago data</a>
+        </footer>
+
+      </div><!-- /#list-content -->
+
+    </main>
+  </div><!-- /.page -->
+
+  <script type="module">
+    import { initLang, getLang, getCopy }       from '/js/lang.js';
+    import { initAdvisory }                     from '/js/advisory.js';
+    import { fetchCenters, sortByDistance,
+             isOpenNow, closingTimeLabel }       from '/js/data.js';
+    import copy                                  from '/js/copy.js';
+
+    const lang = initLang('lang-toggle');
+    let t = getCopy(lang);
+    initAdvisory(lang, copy);
+
+    document.getElementById('lang-toggle').addEventListener('click', () => {
+      t = getCopy(getLang());
+      renderAll();
+    });
+
+    // ── Location (optional) ───────────────────────────────────────────────────
+    const userLat = parseFloat(sessionStorage.getItem('userLat') || '');
+    const userLng = parseFloat(sessionStorage.getItem('userLng') || '');
+    const hasLocation = !isNaN(userLat) && !isNaN(userLng);
+
+    // ── State ─────────────────────────────────────────────────────────────────
+    const PAGE_SIZE = 50;
+    let allCenters  = [];
+    let activeType  = null;
+    let openOnly    = false;
+    let currentPage = 0;
+
+    const openToggle = document.getElementById('open-toggle');
+    openToggle.addEventListener('click', () => {
+      openOnly = !openOnly;
+      openToggle.classList.toggle('is-active', openOnly);
+      openToggle.setAttribute('aria-pressed', openOnly);
+      openToggle.querySelector('.open-dot').hidden  = !openOnly;
+      openToggle.querySelector('#open-toggle-label').textContent = openOnly ? 'Open now' : 'All centers';
+      currentPage = 0;
+      renderList();
+    });
+
+    // ── Load ──────────────────────────────────────────────────────────────────
+    fetchCenters().then(centers => {
+      if (hasLocation) {
+        allCenters = sortByDistance(centers, userLat, userLng);
+      } else {
+        allCenters = [...centers].sort((a, b) => a.name.localeCompare(b.name));
+      }
+      document.getElementById('list-loading').hidden = true;
+      document.getElementById('list-content').hidden = false;
+      renderAll();
+    }).catch(() => {
+      document.getElementById('list-loading').innerHTML =
+        `<p style="color:var(--color-ink-mute);font-size:0.9375rem;">Could not load centers.</p>`;
+    });
+
+    // ── Render ────────────────────────────────────────────────────────────────
+    function renderAll() {
+      t = getCopy(getLang());
+      renderFilters();
+      renderList();
+    }
+
+    function renderFilters() {
+      const select = document.getElementById('type-filter');
+      const types  = [...new Set(allCenters.map(c => c.type).filter(Boolean))].sort();
+
+      select.innerHTML = [
+        `<option value="">${esc(t.filterAll)}</option>`,
+        ...types.map(type => `<option value="${esc(type)}"${activeType === type ? ' selected' : ''}>${esc(type)}</option>`)
+      ].join('');
+
+      select.onchange = () => {
+        activeType  = select.value === '' ? null : select.value;
+        currentPage = 0;
+        renderList();
+      };
+    }
+
+    function renderList() {
+      let filtered = activeType
+        ? allCenters.filter(c => c.type === activeType)
+        : allCenters;
+      if (openOnly) filtered = filtered.filter(c => isOpenNow(c.hoursToday));
+
+      const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+      currentPage = Math.min(currentPage, totalPages - 1);
+      const page = filtered.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
+
+      const openCount = filtered.filter(c => isOpenNow(c.hoursToday)).length;
+      const sortLabel = hasLocation ? t.sortedByDistance : t.sortedByName;
+      document.getElementById('list-meta').textContent =
+        `${filtered.length} centers · ${openCount} ${t.centersOpen} · ${sortLabel}`;
+
+      const list      = document.getElementById('center-list');
+      const noResults = document.getElementById('no-results');
+      const pagination = document.getElementById('pagination');
+
+      if (filtered.length === 0) {
+        list.innerHTML   = '';
+        noResults.hidden  = false;
+        pagination.hidden = true;
+        return;
+      }
+      noResults.hidden = true;
+
+      list.innerHTML = page.map(c => {
+        const open    = isOpenNow(c.hoursToday);
+        const closing = closingTimeLabel(c.hoursToday);
+        const statusText = c.hoursToday === 'Closed'
+          ? t.closedToday
+          : open
+            ? (closing ? `${t.openUntil} ${closing}` : t.openNow)
+            : t.closedNow;
+        const statusColor = open ? 'var(--color-open-dot)' : 'var(--color-ink-mute)';
+
+        const leftCol = hasLocation
+          ? `<div class="walk-time" aria-label="${c.walkMin} ${t.minWalk}">
+               <span class="minutes">${c.walkMin}</span>
+               <span class="unit">min</span>
+             </div>`
+          : '';
+
+        return `
+          <a href="center.html?id=${encodeURIComponent(c.id)}"
+             class="center-row" role="listitem"
+             aria-label="${esc(c.name)}${hasLocation ? ', ' + c.walkMin + ' ' + t.minWalk : ''}">
+            ${leftCol}
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:1.0625rem;font-weight:700;color:var(--color-ink);
+                          letter-spacing:-0.01em;line-height:1.2;">${esc(c.name)}</div>
+              <div style="font-size:0.8125rem;color:var(--color-ink-mute);margin-top:4px;">
+                ${esc(c.type || '')}
+              </div>
+              <div style="font-size:0.8125rem;font-weight:600;margin-top:3px;
+                          color:${statusColor};">
+                ${esc(statusText)}
+              </div>
+            </div>
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+                 style="flex-shrink:0;margin-top:4px;" aria-hidden="true">
+              <path d="M2 7 H11 M7 2 L11 7 L7 12"
+                    stroke="currentColor" stroke-width="1.6" stroke-linecap="square"/>
+            </svg>
+          </a>`;
+      }).join('');
+
+      // Pagination controls
+      if (totalPages <= 1) {
+        pagination.hidden = true;
+      } else {
+        pagination.hidden = false;
+        document.getElementById('page-label').textContent =
+          `Page ${currentPage + 1} of ${totalPages}`;
+        document.getElementById('btn-prev').disabled = currentPage === 0;
+        document.getElementById('btn-next').disabled = currentPage === totalPages - 1;
+      }
+    }
+
+    // ── Pagination button wiring (done once) ──────────────────────────────────
+    document.getElementById('btn-prev').addEventListener('click', () => {
+      if (currentPage > 0) {
+        currentPage--;
+        renderList();
+        document.getElementById('center-list').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+    document.getElementById('btn-next').addEventListener('click', () => {
+      currentPage++;
+      renderList();
+      document.getElementById('center-list').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    function esc(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+  </script>
+
+  <script>
+    try { navigator.sendBeacon('/api/analytics.php', JSON.stringify({ page: 'list' })); } catch {}
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
+  </script>
+
+</body>
+</html>

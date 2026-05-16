@@ -1,0 +1,29 @@
+{
+  "harold-washington-library-center": {
+    "wheelchair": true,
+    "pets": false,
+    "wifi": true,
+    "water": true,
+    "restrooms": true,
+    "seating": true,
+    "notes": "Multiple floors. Elevators available."
+  },
+  "rudy-lozano-branch-library": {
+    "wheelchair": true,
+    "pets": false,
+    "wifi": true,
+    "water": true,
+    "restrooms": true,
+    "seating": true,
+    "notes": ""
+  },
+  "harrison-park-fieldhouse": {
+    "wheelchair": true,
+    "pets": false,
+    "wifi": false,
+    "water": true,
+    "restrooms": true,
+    "seating": true,
+    "notes": "Gym and common areas open during heat emergencies."
+  }
+}

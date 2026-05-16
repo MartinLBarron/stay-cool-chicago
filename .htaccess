@@ -1,0 +1,5 @@
+# Deny direct HTTP access to the admin credentials file
+<Files ".admin-credentials">
+  Order deny,allow
+  Deny from all
+</Files>

@@ -1,0 +1,152 @@
+[
+  {
+    "id": "harold-washington-library-center",
+    "name": "Harold Washington Library Center",
+    "type": "Public library",
+    "address": "400 S State St, Chicago, IL 60605",
+    "phone": "(312) 747-4300",
+    "hoursToday": "9 AM – 9 PM",
+    "lat": 41.8761,
+    "lng": -87.6283
+  },
+  {
+    "id": "chicago-cultural-center",
+    "name": "Chicago Cultural Center",
+    "type": "Cultural center",
+    "address": "78 E Washington St, Chicago, IL 60602",
+    "phone": "(312) 744-6630",
+    "hoursToday": "10 AM – 7 PM",
+    "lat": 41.8836,
+    "lng": -87.6251
+  },
+  {
+    "id": "rudy-lozano-branch-library",
+    "name": "Rudy Lozano Branch Library",
+    "type": "Public library",
+    "address": "1805 S Loomis St, Chicago, IL 60608",
+    "phone": "(312) 746-4329",
+    "hoursToday": "9 AM – 8 PM",
+    "lat": 41.8570,
+    "lng": -87.6611
+  },
+  {
+    "id": "harrison-park-fieldhouse",
+    "name": "Harrison Park Fieldhouse",
+    "type": "Park district",
+    "address": "1824 S Wood St, Chicago, IL 60608",
+    "phone": "(312) 746-5491",
+    "hoursToday": "9 AM – 9 PM",
+    "lat": 41.8566,
+    "lng": -87.6641
+  },
+  {
+    "id": "little-village-branch-library",
+    "name": "Little Village Branch Library",
+    "type": "Public library",
+    "address": "2311 S Kedzie Ave, Chicago, IL 60623",
+    "phone": "(312) 745-1862",
+    "hoursToday": "9 AM – 8 PM",
+    "lat": 41.8498,
+    "lng": -87.7066
+  },
+  {
+    "id": "near-north-branch-library",
+    "name": "Near North Branch Library",
+    "type": "Public library",
+    "address": "310 W Division St, Chicago, IL 60610",
+    "phone": "(312) 744-0991",
+    "hoursToday": "9 AM – 8 PM",
+    "lat": 41.9041,
+    "lng": -87.6358
+  },
+  {
+    "id": "humboldt-park-fieldhouse",
+    "name": "Humboldt Park Fieldhouse",
+    "type": "Park district",
+    "address": "1400 N Sacramento Ave, Chicago, IL 60651",
+    "phone": "(312) 742-7549",
+    "hoursToday": "9 AM – 9 PM",
+    "lat": 41.9003,
+    "lng": -87.7013
+  },
+  {
+    "id": "austin-branch-library",
+    "name": "Austin Branch Library",
+    "type": "Public library",
+    "address": "5615 W Race Ave, Chicago, IL 60644",
+    "phone": "(312) 746-5038",
+    "hoursToday": "9 AM – 8 PM",
+    "lat": 41.8911,
+    "lng": -87.7613
+  },
+  {
+    "id": "uptown-branch-library",
+    "name": "Uptown Branch Library",
+    "type": "Public library",
+    "address": "929 W Buena Ave, Chicago, IL 60613",
+    "phone": "(312) 744-8400",
+    "hoursToday": "9 AM – 8 PM",
+    "lat": 41.9588,
+    "lng": -87.6527
+  },
+  {
+    "id": "bezazian-branch-library",
+    "name": "Bezazian Branch Library",
+    "type": "Public library",
+    "address": "1226 W Ainslie St, Chicago, IL 60640",
+    "phone": "(312) 744-0019",
+    "hoursToday": "9 AM – 8 PM",
+    "lat": 41.9671,
+    "lng": -87.6571
+  },
+  {
+    "id": "englewood-branch-library",
+    "name": "Englewood Branch Library",
+    "type": "Public library",
+    "address": "1745 W 63rd St, Chicago, IL 60636",
+    "phone": "(312) 747-3360",
+    "hoursToday": "9 AM – 8 PM",
+    "lat": 41.7788,
+    "lng": -87.6692
+  },
+  {
+    "id": "chicago-lawn-branch-library",
+    "name": "Chicago Lawn Branch Library",
+    "type": "Public library",
+    "address": "6120 S Kilpatrick Ave, Chicago, IL 60629",
+    "phone": "(312) 747-0639",
+    "hoursToday": "9 AM – 8 PM",
+    "lat": 41.7889,
+    "lng": -87.7358
+  },
+  {
+    "id": "south-shore-cultural-center",
+    "name": "South Shore Cultural Center",
+    "type": "Cultural center",
+    "address": "7059 S Shore Dr, Chicago, IL 60649",
+    "phone": "(312) 745-2470",
+    "hoursToday": "9 AM – 5 PM",
+    "lat": 41.7614,
+    "lng": -87.5641
+  },
+  {
+    "id": "woodson-regional-library",
+    "name": "Woodson Regional Library",
+    "type": "Public library",
+    "address": "9525 S Halsted St, Chicago, IL 60628",
+    "phone": "(312) 747-6900",
+    "hoursToday": "9 AM – 8 PM",
+    "lat": 41.7220,
+    "lng": -87.6437
+  },
+  {
+    "id": "sulzer-regional-library",
+    "name": "Sulzer Regional Library",
+    "type": "Public library",
+    "address": "4455 N Lincoln Ave, Chicago, IL 60625",
+    "phone": "(312) 744-7616",
+    "hoursToday": "9 AM – 9 PM",
+    "lat": 41.9628,
+    "lng": -87.6836
+  }
+]

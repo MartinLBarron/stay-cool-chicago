@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title data-i18n-title="appName">Stay Cool Chicago</title>
+  <meta name="description" content="Find a Chicago cooling center near your address or neighborhood." />
+  <meta name="theme-color" content="#0a2a55" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/png" href="/assets/icons/favicon-32.png" sizes="32x32" />
+  <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png" />
+  <link rel="stylesheet" href="css/main.css" />
+</head>
+<body>
+
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <div class="page">
+    <div id="advisory-container" hidden></div>
+
+    <header class="page-header" style="padding:12px var(--page-pad);border-bottom:1px solid var(--color-hair);">
+      <a class="brand-mark" href="index.html" aria-label="Stay Cool Chicago — home">
+        <svg width="22" height="22" viewBox="0 0 28 28" aria-hidden="true" focusable="false">
+          <rect x="2" y="2" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"/>
+          <circle cx="14" cy="14" r="5" fill="none" stroke="currentColor" stroke-width="2"/>
+          <line x1="14" y1="4"  x2="14" y2="7"  stroke="currentColor" stroke-width="2" stroke-linecap="square"/>
+          <line x1="14" y1="21" x2="14" y2="24" stroke="currentColor" stroke-width="2" stroke-linecap="square"/>
+          <line x1="4"  y1="14" x2="7"  y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="square"/>
+          <line x1="21" y1="14" x2="24" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="square"/>
+        </svg>
+        <span class="brand-name" data-i18n="appName">Stay Cool Chicago</span>
+      </a>
+      <button class="lang-toggle" id="lang-toggle" style="margin-left:auto;" aria-label="Switch language">
+        <span data-i18n="langToggle">Español</span>
+      </button>
+    </header>
+
+    <main id="main">
+
+      <!-- Hero text -->
+      <div style="padding:28px var(--page-pad) 20px;">
+        <h1 data-i18n="searchHeadline">Where are you?</h1>
+        <p style="margin-top:10px;font-size:1rem;color:var(--color-ink-mute);line-height:1.5;"
+           data-i18n="searchSub">Type a street, ZIP, or pick a neighborhood.</p>
+      </div>
+
+      <!-- Search form -->
+      <div style="padding:0 var(--page-pad);">
+        <form id="search-form" novalidate>
+          <div style="position:relative;">
+            <div class="search-field">
+              <input id="search-input" class="search-input"
+                     type="search" inputmode="search" autocomplete="off" autocorrect="off"
+                     data-i18n-placeholder="searchPlaceholder"
+                     placeholder="Street, ZIP code, or landmark"
+                     aria-label="Search address"
+                     aria-autocomplete="list"
+                     aria-controls="suggestions"
+                     required />
+              <button type="submit" class="search-submit"
+                      id="search-btn"
+                      data-i18n-aria-label="searchBtn"
+                      aria-label="Search">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true" focusable="false">
+                  <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="2"/>
+                  <line x1="12.5" y1="12.5" x2="17" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="square"/>
+                </svg>
+              </button>
+            </div>
+            <!-- Autocomplete suggestions -->
+            <div id="suggestions" hidden role="listbox" aria-label="Address suggestions"></div>
+          </div>
+        </form>
+
+        <!-- Geocode error (hidden until needed) -->
+        <div id="search-error" role="alert" aria-live="assertive" hidden
+             style="margin-top:10px;padding:12px 14px;background:var(--color-accent);color:#fff;">
+          <p id="search-error-msg" style="font-size:0.875rem;font-weight:700;"></p>
+          <p id="search-error-sub" style="font-size:0.8125rem;margin-top:4px;opacity:0.9;"></p>
+        </div>
+      </div>
+
+      <!-- Neighborhood picker -->
+      <div style="padding:28px var(--page-pad) 0;">
+        <p class="text-overline" data-i18n="pickNeighborhood">Or pick a neighborhood</p>
+        <div id="neighborhood-grid" class="neighborhood-grid"></div>
+      </div>
+
+
+    </main>
+  </div><!-- /.page -->
+
+  <script type="module">
+    import { initLang, getLang, getCopy } from '/js/lang.js';
+    import { initAdvisory }               from '/js/advisory.js';
+    import copy                            from '/js/copy.js';
+
+    const lang = initLang('lang-toggle');
+    initAdvisory(lang, copy);
+
+    let t = getCopy(lang);
+
+    // ── Refresh lang-dependent rendered content ────────────────────────
+    document.getElementById('lang-toggle').addEventListener('click', () => {
+      t = getCopy(getLang());
+      renderNeighborhoods();
+    });
+
+    // ── Neighborhood grid ──────────────────────────────────────────────
+    function renderNeighborhoods() {
+      const grid = document.getElementById('neighborhood-grid');
+      grid.innerHTML = t.neighborhoods.map(n => `
+        <button class="neighborhood-btn"
+                data-lat="${n.lat}" data-lng="${n.lng}" data-label="${esc(n.label)}">
+          <span>${esc(n.label)}</span>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" focusable="false">
+            <path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"/>
+          </svg>
+        </button>
+      `).join('');
+
+      grid.querySelectorAll('.neighborhood-btn').forEach(btn => {
+        btn.addEventListener('click', () => navigate(
+          btn.dataset.lat, btn.dataset.lng, btn.dataset.label
+        ));
+      });
+    }
+
+    renderNeighborhoods();
+
+    // ── Navigation helper ──────────────────────────────────────────────
+    function navigate(lat, lng, label) {
+      sessionStorage.setItem('userLat',   lat);
+      sessionStorage.setItem('userLng',   lng);
+      sessionStorage.setItem('userLabel', label);
+      window.location.href = 'home.html';
+    }
+
+    // ── Geocode via Nominatim ──────────────────────────────────────────
+    async function geocode(query) {
+      const q = encodeURIComponent(query + ', Chicago, IL, USA');
+      const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${q}&countrycodes=us`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('network');
+      const data = await res.json();
+      if (!data.length) throw new Error('no_results');
+      const parts = data[0].display_name.split(',');
+      const label = parts.slice(0, Math.min(2, parts.length)).join(',').trim();
+      return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon), label };
+    }
+
+    // ── Search form ────────────────────────────────────────────────────
+    const form  = document.getElementById('search-form');
+    const input = document.getElementById('search-input');
+    const btn   = document.getElementById('search-btn');
+    const errEl = document.getElementById('search-error');
+
+    function setSearching(on) {
+      btn.disabled = on;
+      btn.setAttribute('aria-busy', on);
+      if (on) {
+        btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"
+          style="animation:spin 0.8s linear infinite;">
+          <circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="2.5"
+                  stroke-dasharray="22" stroke-dashoffset="8" fill="none"/>
+        </svg>`;
+      } else {
+        btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true" focusable="false">
+          <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="2"/>
+          <line x1="12.5" y1="12.5" x2="17" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="square"/>
+        </svg>`;
+      }
+    }
+
+    function showError(msg, sub) {
+      document.getElementById('search-error-msg').textContent = msg;
+      document.getElementById('search-error-sub').textContent = sub || '';
+      errEl.hidden = false;
+      input.focus();
+    }
+
+    function clearError() { errEl.hidden = true; }
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      const query = input.value.trim();
+      if (!query) return;
+
+      clearError();
+      setSearching(true);
+      try {
+        const { lat, lng, label } = await geocode(query);
+        navigate(lat, lng, label);
+      } catch (err) {
+        setSearching(false);
+        if (err.message === 'no_results') {
+          showError(t.geocodeError, t.geocodeErrorSub);
+        } else {
+          showError(t.geocodeErrorSub);
+        }
+      }
+    });
+
+    // ── Autocomplete ───────────────────────────────────────────────────
+    const CHICAGO_BBOX  = '-87.9401,41.6445,-87.5241,42.0230';
+    const suggestEl     = document.getElementById('suggestions');
+    let debounceTimer   = null;
+    let suggestions     = [];
+    let activeIdx       = -1;
+
+    input.addEventListener('input', () => {
+      clearTimeout(debounceTimer);
+      activeIdx = -1;
+      const q = input.value.trim();
+      if (q.length < 3) { hideSuggestions(); return; }
+      debounceTimer = setTimeout(() => fetchSuggestions(q), 300);
+    });
+
+    input.addEventListener('keydown', e => {
+      if (suggestEl.hidden) return;
+      const items = suggestEl.querySelectorAll('.suggestion-item');
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        activeIdx = Math.min(activeIdx + 1, items.length - 1);
+        applyActive(items);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        activeIdx = Math.max(activeIdx - 1, -1);
+        applyActive(items);
+      } else if (e.key === 'Enter' && activeIdx >= 0) {
+        e.preventDefault();
+        pickSuggestion(suggestions[activeIdx]);
+      } else if (e.key === 'Escape') {
+        hideSuggestions();
+      }
+    });
+
+    // Close on outside click
+    document.addEventListener('pointerdown', e => {
+      if (!e.target.closest('#search-form')) hideSuggestions();
+    });
+
+    async function fetchSuggestions(q) {
+      try {
+        const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&bbox=${CHICAGO_BBOX}&limit=5&lang=en`;
+        const res = await fetch(url);
+        if (!res.ok) return;
+        const data = await res.json();
+        suggestions = (data.features || []).filter(f => f.geometry?.coordinates);
+        renderSuggestions();
+      } catch {
+        hideSuggestions();
+      }
+    }
+
+    function labelFor(props) {
+      const parts = [];
+      if (props.housenumber && props.street) parts.push(`${props.housenumber} ${props.street}`);
+      else if (props.street) parts.push(props.street);
+      else if (props.name)   parts.push(props.name);
+      const sub = [props.district, props.postcode].filter(Boolean).join(' ');
+      return { primary: parts.join('') || props.name || '', secondary: sub };
+    }
+
+    function renderSuggestions() {
+      if (!suggestions.length) { hideSuggestions(); return; }
+      suggestEl.innerHTML = suggestions.map((f, i) => {
+        const { primary, secondary } = labelFor(f.properties);
+        return `<button class="suggestion-item" type="button" role="option" data-idx="${i}">
+          <span class="suggestion-primary">${esc(primary)}</span>
+          ${secondary ? `<span class="suggestion-secondary">${esc(secondary)}</span>` : ''}
+        </button>`;
+      }).join('');
+      suggestEl.hidden = false;
+
+      suggestEl.querySelectorAll('.suggestion-item').forEach(btn => {
+        btn.addEventListener('pointerdown', e => {
+          e.preventDefault(); // prevent input blur before click fires
+          pickSuggestion(suggestions[+btn.dataset.idx]);
+        });
+      });
+    }
+
+    function applyActive(items) {
+      items.forEach((el, i) => el.classList.toggle('is-active', i === activeIdx));
+      if (activeIdx >= 0) {
+        input.value = labelFor(suggestions[activeIdx].properties).primary;
+      }
+    }
+
+    function pickSuggestion(feature) {
+      const [lng, lat] = feature.geometry.coordinates;
+      const { primary } = labelFor(feature.properties);
+      hideSuggestions();
+      input.value = primary;
+      navigate(lat, lng, primary);
+    }
+
+    function hideSuggestions() {
+      suggestEl.hidden = true;
+      suggestEl.innerHTML = '';
+      suggestions = [];
+      activeIdx = -1;
+    }
+
+    // Clear suggestions when form submits
+    form.addEventListener('submit', () => hideSuggestions(), { capture: true });
+
+    // ── Helpers ────────────────────────────────────────────────────────
+    function esc(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+  </script>
+
+  <style>
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #suggestions {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--color-paper);
+      border: 1.5px solid var(--color-ink);
+      border-top: none;
+      z-index: 200;
+      max-height: 280px;
+      overflow-y: auto;
+    }
+    .suggestion-item {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      width: 100%;
+      padding: 12px 16px;
+      border: none;
+      border-bottom: 1px solid var(--color-hair);
+      background: transparent;
+      color: var(--color-ink);
+      font-family: inherit;
+      cursor: pointer;
+      text-align: left;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .suggestion-item:last-child  { border-bottom: none; }
+    .suggestion-item:hover,
+    .suggestion-item.is-active   { background: var(--color-bg); }
+    .suggestion-primary   { font-size: 0.9375rem; font-weight: 600; line-height: 1.3; }
+    .suggestion-secondary { font-size: 0.8125rem; color: var(--color-ink-mute); margin-top: 2px; }
+  </style>
+
+  <script>
+    try { navigator.sendBeacon('/api/analytics.php', JSON.stringify({ page: 'search' })); } catch {}
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
+  </script>
+
+</body>
+</html>

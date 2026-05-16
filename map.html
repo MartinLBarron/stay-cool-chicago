@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title data-i18n-title="appName">Stay Cool Chicago</title>
+  <meta name="description" content="Map of all open cooling centers across Chicago." />
+  <meta name="theme-color" content="#0a2a55" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/png" href="/assets/icons/favicon-32.png" sizes="32x32" />
+  <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png" />
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+</head>
+<body>
+
+  <a class="skip-link" href="#main">Skip to map</a>
+
+  <div class="map-shell">
+    <div id="advisory-container" hidden></div>
+
+    <header class="map-header">
+      <div class="map-header-title">
+        <p class="brand-name" data-i18n="mapTitle">Cooling centers</p>
+        <p id="open-count" aria-live="polite"></p>
+      </div>
+
+      <button class="lang-toggle" id="lang-toggle" aria-label="Switch language">
+        <span data-i18n="langToggle">Español</span>
+      </button>
+    </header>
+
+    <main id="main">
+      <div id="map" role="application" aria-label="Map of Chicago cooling centers"></div>
+      <button id="locate-btn" class="locate-btn"
+              data-i18n-aria-label="locateMe" aria-label="Locate me">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true" focusable="false">
+          <circle cx="10" cy="10" r="3" fill="currentColor"/>
+          <circle cx="10" cy="10" r="6.5" stroke="currentColor" stroke-width="1.8" fill="none"/>
+          <line x1="10" y1="1" x2="10" y2="3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <line x1="10" y1="16.5" x2="10" y2="19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <line x1="1" y1="10" x2="3.5" y2="10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <line x1="16.5" y1="10" x2="19" y2="10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </main>
+
+    <section id="bottom-sheet" class="map-bottom-sheet"
+             aria-live="polite" aria-atomic="true" aria-label="Selected center">
+      <div class="map-card-placeholder">
+        <p class="text-caption mute" style="text-align:center;padding:22px 0;">Loading…</p>
+      </div>
+    </section>
+  </div>
+
+  <!-- Leaflet must load before the ES module so L is available as a global -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <script type="module">
+    import { initLang, getLang }                                  from '/js/lang.js';
+    import { initAdvisory }                                       from '/js/advisory.js';
+    import { fetchCenters, sortByDistance, isOpenNow,
+             closingTimeLabel }                                   from '/js/data.js';
+    import { getDirectionsURLs }                                  from '/js/directions.js';
+    import copy                                                   from '/js/copy.js';
+
+    const lang = initLang('lang-toggle');
+    initAdvisory(lang, copy);
+
+    // ── User coords from session ───────────────────────────────────────
+    const rawLat = sessionStorage.getItem('userLat');
+    const rawLng = sessionStorage.getItem('userLng');
+    let userLat = rawLat ? parseFloat(rawLat) : null;
+    let userLng = rawLng ? parseFloat(rawLng) : null;
+    if (isNaN(userLat)) userLat = null;
+    if (isNaN(userLng)) userLng = null;
+
+    // ── Module state ───────────────────────────────────────────────────
+    let allCenters    = [];
+    let userMarker    = null;
+    let selectedCenter = null;
+    let openCount     = 0;
+
+    // ── Leaflet map ────────────────────────────────────────────────────
+    const map = L.map('map', {
+      center: [41.8781, -87.6298],
+      zoom: 11,
+      zoomControl: false,
+      attributionControl: true,
+    });
+
+    L.control.zoom({ position: 'topright' }).addTo(map);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 19,
+    }).addTo(map);
+
+    // ── Helpers ────────────────────────────────────────────────────────
+    function esc(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function makePinIcon(isOpen) {
+      return L.divIcon({
+        html: `<div class="${isOpen ? 'map-pin map-pin--open' : 'map-pin map-pin--closed'}"></div>`,
+        className: '',
+        iconSize:   [24, 24],
+        iconAnchor: [12, 12],
+      });
+    }
+
+    function makeUserIcon() {
+      return L.divIcon({
+        html: '<div class="map-user-dot"></div>',
+        className: '',
+        iconSize:   [16, 16],
+        iconAnchor: [8, 8],
+      });
+    }
+
+    // ── Bottom-sheet rendering ─────────────────────────────────────────
+    function renderBottomSheet(center) {
+      selectedCenter = center;
+      const t        = copy[getLang()];
+      const isOpen   = isOpenNow(center.hoursToday);
+      const closeAt  = closingTimeLabel(center.hoursToday);
+      const { primary: dirUrl } = getDirectionsURLs(center.lat, center.lng);
+
+      const chipHtml = isOpen
+        ? `<div class="chip chip-open"><span class="chip-dot"></span>${
+             closeAt ? `${esc(t.openUntil)} ${esc(closeAt)}` : esc(t.openNow)}</div>`
+        : `<div class="chip chip-closed">${esc(t.closedNow)}</div>`;
+
+      const metaHtml = [
+        center.distMi != null
+          ? `${center.distMi < 0.1 ? '&lt;0.1' : center.distMi.toFixed(1)} ${esc(t.miAway)}`
+          : null,
+        center.walkMin != null
+          ? `${center.walkMin} ${esc(t.minWalk)}`
+          : null,
+      ].filter(Boolean).join(' · ');
+
+      document.getElementById('bottom-sheet').innerHTML = `
+        <div class="map-card">
+          <a class="map-card-link" href="center.html?id=${esc(center.id)}">
+            <div class="map-card-top">
+              ${chipHtml}
+              ${metaHtml ? `<span class="text-caption mute">${metaHtml}</span>` : ''}
+            </div>
+            <p class="map-card-name">${esc(center.name)}</p>
+            <p class="map-card-sub">${esc(center.address)}</p>
+          </a>
+          <div class="map-card-actions">
+            <a href="${esc(dirUrl)}"
+               class="btn btn-primary map-card-dir"
+               target="_blank" rel="noopener noreferrer">${esc(t.getDirections)}</a>
+            <a href="center.html?id=${esc(center.id)}"
+               class="map-card-detail btn-icon"
+               aria-label="Details"
+               style="text-decoration:none;display:flex;align-items:center;justify-content:center;">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true" focusable="false">
+                <path d="M4 9h10M10 4l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="square"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderNoOpen() {
+      const t = copy[getLang()];
+      document.getElementById('bottom-sheet').innerHTML = `
+        <div class="map-card" style="text-align:center;">
+          <p style="font-weight:700;margin-bottom:6px;">${esc(t.noCentersOpen)}</p>
+          <p class="text-caption mute" style="margin-bottom:14px;">${esc(t.noCentersOpenSub)}</p>
+          <a href="tel:311" class="btn btn-primary" style="justify-content:center;">${esc(t.call311)}</a>
+        </div>
+      `;
+    }
+
+    function renderTapPrompt() {
+      document.getElementById('bottom-sheet').innerHTML =
+        '<p class="text-caption mute" style="text-align:center;padding:22px 20px;" data-i18n="nearestCenter">Nearest open center</p>';
+    }
+
+    // ── Advisory banner resize → invalidate map ────────────────────────
+    new MutationObserver(() => map.invalidateSize()).observe(
+      document.getElementById('advisory-container'),
+      { attributes: true, childList: true, subtree: true }
+    );
+
+    // ── User location dot ──────────────────────────────────────────────
+    function placeUserDot(lat, lng) {
+      if (userMarker) userMarker.remove();
+      userMarker = L.marker([lat, lng], {
+        icon: makeUserIcon(),
+        zIndexOffset: 1000,
+        interactive: false,
+      }).addTo(map);
+    }
+
+    // ── Locate me ──────────────────────────────────────────────────────
+    function locateUser() {
+      if (!navigator.geolocation) return;
+      const btn = document.getElementById('locate-btn');
+      btn.disabled = true;
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          btn.disabled = false;
+          userLat = pos.coords.latitude;
+          userLng = pos.coords.longitude;
+          sessionStorage.setItem('userLat', userLat);
+          sessionStorage.setItem('userLng', userLng);
+          placeUserDot(userLat, userLng);
+          map.setView([userLat, userLng], 14);
+          if (allCenters.length) {
+            const sorted = sortByDistance(allCenters, userLat, userLng);
+            const nearestOpen = sorted.find(c => isOpenNow(c.hoursToday));
+            if (nearestOpen) renderBottomSheet(nearestOpen);
+          }
+        },
+        () => { btn.disabled = false; }
+      );
+    }
+
+    document.getElementById('locate-btn').addEventListener('click', locateUser);
+
+    // ── Load centers ───────────────────────────────────────────────────
+    fetchCenters().then(centers => {
+      allCenters = centers;
+
+      const sorted = (userLat && userLng)
+        ? sortByDistance(centers, userLat, userLng)
+        : centers;
+
+      const openCenters = sorted.filter(c => isOpenNow(c.hoursToday));
+      openCount = openCenters.length;
+
+      // Header count
+      const t = copy[getLang()];
+      document.getElementById('open-count').textContent =
+        `${openCount} ${t.centersOpen}`;
+
+      // User location dot
+      if (userLat && userLng) placeUserDot(userLat, userLng);
+
+      // Plot all markers
+      sorted.forEach(center => {
+        const isOpen = isOpenNow(center.hoursToday);
+        const marker = L.marker([center.lat, center.lng], {
+          icon:        makePinIcon(isOpen),
+          title:       center.name,
+          riseOnHover: true,
+          keyboard:    true,
+        }).addTo(map);
+
+        marker.on('click', () => {
+          renderBottomSheet(center);
+          map.panTo([center.lat, center.lng]);
+        });
+      });
+
+      // Fit / center map
+      if (userLat && userLng) {
+        map.setView([userLat, userLng], 13);
+      } else if (openCenters.length > 0) {
+        const bounds = L.latLngBounds(openCenters.map(c => [c.lat, c.lng]));
+        map.fitBounds(bounds, { padding: [48, 48], maxZoom: 14 });
+      }
+
+      // Bottom sheet default
+      const nearestOpen = sorted.find(c => isOpenNow(c.hoursToday));
+      if (nearestOpen)         renderBottomSheet(nearestOpen);
+      else if (!openCount)     renderNoOpen();
+      else                     renderTapPrompt();
+
+      // Let layout settle, then fix tile rendering
+      setTimeout(() => map.invalidateSize(), 80);
+
+    }).catch(() => {
+      document.getElementById('bottom-sheet').innerHTML =
+        '<p class="text-caption mute" style="text-align:center;padding:22px 20px;">Could not load centers.</p>';
+    });
+
+    // ── Language toggle: refresh dynamic text ──────────────────────────
+    document.getElementById('lang-toggle').addEventListener('click', () => {
+      requestAnimationFrame(() => {
+        const t = copy[getLang()];
+        if (openCount > 0) {
+          document.getElementById('open-count').textContent =
+            `${openCount} ${t.centersOpen}`;
+        }
+        if (selectedCenter) renderBottomSheet(selectedCenter);
+        else if (!openCount) renderNoOpen();
+      });
+    });
+  </script>
+
+  <script>
+    try { navigator.sendBeacon('/api/analytics.php', JSON.stringify({ page: 'map' })); } catch {}
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
+  </script>
+
+</body>
+</html>

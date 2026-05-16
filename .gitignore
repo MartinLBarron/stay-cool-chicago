@@ -1,0 +1,13 @@
+# Admin credentials — generate locally, deploy via SFTP, never commit
+.admin-credentials
+
+# Temporary debug/setup scripts — delete from server after use
+admin-debug.php
+admin-setup.php
+
+# macOS
+.DS_Store
+
+# Cache files written by PHP on the server
+cache/*.json
+data/analytics.json
