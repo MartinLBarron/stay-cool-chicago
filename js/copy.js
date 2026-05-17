@@ -25,7 +25,7 @@ const copy = {
     searchCenter:    'Search for cooling center',
     searchCenterSub: 'By address or neighborhood',
     viewMap: 'See all cooling centers',
-    viewMapSub: '120+ locations across the city',
+    viewMapSub: '280+ locations across the city',
     needRide: 'Need assistance? Call 311',
 
     // Home / nearest center
@@ -129,7 +129,7 @@ const copy = {
     searchCenter:    'Buscar centro de enfriamiento',
     searchCenterSub: 'Por dirección o vecindario',
     viewMap: 'Ver todos los centros',
-    viewMapSub: 'Más de 120 lugares en la ciudad',
+    viewMapSub: 'Más de 280 lugares en la ciudad',
     needRide: '¿Necesita ayuda? Llame al 311',
 
     // Home / nearest center

@@ -24,30 +24,6 @@
       font-size: 0.9375rem;
     }
 
-    /* Desktop directions row (shown only on desktop) */
-    .dir-links {
-      display: flex;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    .dir-links a {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      min-height: 44px;
-      font-size: 0.8125rem;
-      font-weight: 700;
-      color: var(--color-ink);
-      border: 1.5px solid var(--color-hair);
-      text-decoration: none;
-      padding: 10px;
-    }
-    .dir-links a:focus-visible {
-      outline: 3px solid var(--color-ink);
-      outline-offset: 2px;
-    }
 
     /* Copied toast */
     #share-toast {
@@ -187,7 +163,7 @@
     import { initAdvisory }                          from '/js/advisory.js';
     import { fetchCenters, sortByDistance,
              isOpenNow, closingTimeLabel }            from '/js/data.js';
-    import { getDirectionsURLs, isDesktop }           from '/js/directions.js';
+    import { getDirectionsURLs }                       from '/js/directions.js';
     import copy                                       from '/js/copy.js';
 
     // ── Language & advisory ───────────────────────────────────────────────────
@@ -309,24 +285,6 @@
           </svg>
         </a>
 
-        <!-- Desktop: show both map links -->
-        ${isDesktop() ? `
-        <div class="dir-links" aria-label="Open directions in maps app">
-          <a href="${esc(dirs.primary)}"  target="_blank" rel="noopener noreferrer">
-            <svg width="14" height="14" viewBox="0 0 22 22" fill="none" aria-hidden="true">
-              <path d="M2 5 L8 3 L14 5 L20 3 V17 L14 19 L8 17 L2 19 Z"
-                    stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-            </svg>
-            ${esc(dirs.primaryLabel)}
-          </a>
-          <a href="${esc(dirs.fallback)}" target="_blank" rel="noopener noreferrer">
-            <svg width="14" height="14" viewBox="0 0 22 22" fill="none" aria-hidden="true">
-              <path d="M2 5 L8 3 L14 5 L20 3 V17 L14 19 L8 17 L2 19 Z"
-                    stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-            </svg>
-            ${esc(dirs.fallbackLabel)}
-          </a>
-        </div>` : ''}
 
         <!-- Call + Share buttons -->
         <div class="btn-row">
