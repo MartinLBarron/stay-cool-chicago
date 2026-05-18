@@ -62,11 +62,33 @@
       <!-- Primary + secondary CTAs -->
       <div class="welcome-actions">
 
+        <!-- Find nearest indoor cooling center -->
+        <button id="btn-find-nearest-indoor" class="action-btn primary"
+                aria-label="Find nearest indoor cooling center using your location">
+          <span class="action-btn-icon" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true" focusable="false">
+              <circle cx="11" cy="11" r="4" stroke="currentColor" stroke-width="2"/>
+              <circle cx="11" cy="11" r="1.5" fill="currentColor"/>
+              <line x1="11" y1="1"    x2="11" y2="4.5"  stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <line x1="11" y1="17.5" x2="11" y2="21"   stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <line x1="1"  y1="11"   x2="4.5" y2="11"  stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <line x1="17.5" y1="11" x2="21"  y2="11"  stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="action-btn-text">
+            <span class="action-btn-label" data-i18n="findNearestIndoor">Find nearest indoor cooling center</span>
+            <span class="action-btn-sub"   data-i18n="findNearestIndoorSub">Uses your location</span>
+          </span>
+          <svg class="action-btn-arrow" width="20" height="20" viewBox="0 0 22 22" fill="none"
+               aria-hidden="true" focusable="false">
+            <path d="M3 11 H18 M12 5 L18 11 L12 17" stroke="currentColor" stroke-width="2.2" stroke-linecap="square"/>
+          </svg>
+        </button>
+
         <!-- Find nearest cooling center -->
-        <button id="btn-find-nearest" class="action-btn primary"
+        <button id="btn-find-nearest" class="action-btn secondary mt-10"
                 aria-label="Find nearest cooling center using your location">
           <span class="action-btn-icon" aria-hidden="true">
-            <!-- Crosshair / location icon -->
             <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true" focusable="false">
               <circle cx="11" cy="11" r="4" stroke="currentColor" stroke-width="2"/>
               <circle cx="11" cy="11" r="1.5" fill="currentColor"/>
@@ -78,7 +100,7 @@
           </span>
           <span class="action-btn-text">
             <span class="action-btn-label" data-i18n="findNearest">Find nearest cooling center</span>
-            <span class="action-btn-sub"   data-i18n="findNearestSub">Uses your location</span>
+            <span class="action-btn-sub"   data-i18n="findNearestSub">Uses your location. Includes Spray Features</span>
           </span>
           <svg class="action-btn-arrow" width="20" height="20" viewBox="0 0 22 22" fill="none"
                aria-hidden="true" focusable="false">
@@ -97,7 +119,7 @@
           </span>
           <span class="action-btn-text">
             <span class="action-btn-label" data-i18n="searchCenter">Search for cooling center</span>
-            <span class="action-btn-sub"   data-i18n="searchCenterSub">By address or neighborhood</span>
+            <span class="action-btn-sub"   data-i18n="searchCenterSub">By address, zip, or landmark</span>
           </span>
           <svg class="action-btn-arrow" width="20" height="20" viewBox="0 0 22 22" fill="none"
                aria-hidden="true" focusable="false">
@@ -183,29 +205,29 @@
     });
 
     // ── Geolocation flow ──────────────────────────────────────────────────────
-    const btnFind = document.getElementById('btn-find-nearest');
-
-    btnFind.addEventListener('click', () => {
+    function geolocateAndGo(extraParams = '') {
       if (!navigator.geolocation) {
         window.location.href = 'search.html';
         return;
       }
-
       navigator.geolocation.getCurrentPosition(
         ({ coords }) => {
           const { latitude: lat, longitude: lng } = coords;
           sessionStorage.setItem('userLat',   lat);
           sessionStorage.setItem('userLng',   lng);
           sessionStorage.setItem('userLabel', 'Near you');
-          window.location.href = `home.html?lat=${lat}&lng=${lng}`;
+          window.location.href = `home.html?lat=${lat}&lng=${lng}${extraParams}`;
         },
-        () => {
-          // Denied or timed out → send to search
-          window.location.href = 'search.html';
-        },
+        () => { window.location.href = 'search.html'; },
         { timeout: 10_000, enableHighAccuracy: false, maximumAge: 60_000 }
       );
-    });
+    }
+
+    document.getElementById('btn-find-nearest').addEventListener('click',
+      () => geolocateAndGo());
+
+    document.getElementById('btn-find-nearest-indoor').addEventListener('click',
+      () => geolocateAndGo('&indoor=1'));
   </script>
 
   <script>

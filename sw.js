@@ -18,6 +18,7 @@ const SHELL_ASSETS = [
   '/js/lang.js',
   '/js/advisory.js',
   '/js/directions.js',
+  '/js/icons.js',
   '/manifest.json',
   '/assets/icons/icon-192.png',
   '/assets/icons/icon-512.png',

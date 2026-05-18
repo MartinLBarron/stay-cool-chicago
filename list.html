@@ -208,6 +208,7 @@
     import { initAdvisory }                     from '/js/advisory.js';
     import { fetchCenters, sortByDistance,
              isOpenNow, closingTimeLabel }       from '/js/data.js';
+    import { typeIcon }                          from '/js/icons.js';
     import copy                                  from '/js/copy.js';
 
     const lang = initLang('lang-toggle');
@@ -329,6 +330,7 @@
              class="center-row" role="listitem"
              aria-label="${esc(c.name)}${hasLocation ? ', ' + c.walkMin + ' ' + t.minWalk : ''}">
             ${leftCol}
+            <div class="center-type-icon">${typeIcon(c.type)}</div>
             <div style="flex:1;min-width:0;">
               <div style="font-size:1.0625rem;font-weight:700;color:var(--color-ink);
                           letter-spacing:-0.01em;line-height:1.2;">${esc(c.name)}</div>

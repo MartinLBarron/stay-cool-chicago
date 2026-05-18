@@ -41,7 +41,7 @@
       <div style="padding:28px var(--page-pad) 20px;">
         <h1 data-i18n="searchHeadline">Where are you?</h1>
         <p style="margin-top:10px;font-size:1rem;color:var(--color-ink-mute);line-height:1.5;"
-           data-i18n="searchSub">Type a street, ZIP, or pick a neighborhood.</p>
+           data-i18n="searchSub">Type a street address or ZIP code.</p>
       </div>
 
       <!-- Search form -->
@@ -80,11 +80,6 @@
         </div>
       </div>
 
-      <!-- Neighborhood picker -->
-      <div style="padding:28px var(--page-pad) 0;">
-        <p class="text-overline" data-i18n="pickNeighborhood">Or pick a neighborhood</p>
-        <div id="neighborhood-grid" class="neighborhood-grid"></div>
-      </div>
 
 
     </main>
@@ -100,33 +95,9 @@
 
     let t = getCopy(lang);
 
-    // ── Refresh lang-dependent rendered content ────────────────────────
     document.getElementById('lang-toggle').addEventListener('click', () => {
       t = getCopy(getLang());
-      renderNeighborhoods();
     });
-
-    // ── Neighborhood grid ──────────────────────────────────────────────
-    function renderNeighborhoods() {
-      const grid = document.getElementById('neighborhood-grid');
-      grid.innerHTML = t.neighborhoods.map(n => `
-        <button class="neighborhood-btn"
-                data-lat="${n.lat}" data-lng="${n.lng}" data-label="${esc(n.label)}">
-          <span>${esc(n.label)}</span>
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" focusable="false">
-            <path d="M3 7h8M7 3l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"/>
-          </svg>
-        </button>
-      `).join('');
-
-      grid.querySelectorAll('.neighborhood-btn').forEach(btn => {
-        btn.addEventListener('click', () => navigate(
-          btn.dataset.lat, btn.dataset.lng, btn.dataset.label
-        ));
-      });
-    }
-
-    renderNeighborhoods();
 
     // ── Navigation helper ──────────────────────────────────────────────
     function navigate(lat, lng, label) {

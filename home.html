@@ -164,6 +164,7 @@
     import { fetchCenters, sortByDistance,
              isOpenNow, closingTimeLabel }            from '/js/data.js';
     import { getDirectionsURLs }                       from '/js/directions.js';
+    import { typeIcon }                                from '/js/icons.js';
     import copy                                       from '/js/copy.js';
 
     // ── Language & advisory ───────────────────────────────────────────────────
@@ -183,6 +184,7 @@
     const params = new URLSearchParams(location.search);
     const lat = parseFloat(sessionStorage.getItem('userLat') || params.get('lat') || '');
     const lng = parseFloat(sessionStorage.getItem('userLng') || params.get('lng') || '');
+    const indoorOnly = params.get('indoor') === '1';
 
     if (!lat || !lng) {
       // No location at all — send back to welcome
@@ -207,7 +209,8 @@
       }
 
       const sorted = sortByDistance(centers, userLat, userLng);
-      const open   = sorted.filter(c => isOpenNow(c.hoursToday));
+      let open = sorted.filter(c => isOpenNow(c.hoursToday));
+      if (indoorOnly) open = open.filter(c => c.type !== 'Park District Spray Feature');
 
       if (open.length === 0) {
         showEmpty();
@@ -246,15 +249,21 @@
         </div>
 
         <!-- Name, type, address -->
-        <h2 id="hero-name" style="font-size:1.5rem;font-weight:800;letter-spacing:-0.02em;
-            line-height:1.1;margin-top:14px;">
-          <a href="center.html?id=${encodeURIComponent(center.id)}"
-             style="color:inherit;text-decoration:none;"
-             aria-label="${esc(center.name)} — ${esc(t.viewDetails)}">${esc(center.name)}</a>
-        </h2>
-        <p style="font-size:0.9375rem;color:var(--color-ink-mute);margin-top:4px;">
-          ${esc(center.type)} · ${esc(center.address)}
-        </p>
+        <div style="display:flex;align-items:flex-start;gap:14px;margin-top:14px;">
+          <div style="flex-shrink:0;color:var(--color-ink-mute);padding-top:3px;">
+            ${typeIcon(center.type, 40)}
+          </div>
+          <div>
+            <h2 id="hero-name" style="font-size:1.5rem;font-weight:800;letter-spacing:-0.02em;line-height:1.1;">
+              <a href="center.html?id=${encodeURIComponent(center.id)}"
+                 style="color:inherit;text-decoration:none;"
+                 aria-label="${esc(center.name)} — ${esc(t.viewDetails)}">${esc(center.name)}</a>
+            </h2>
+            <p style="font-size:0.9375rem;color:var(--color-ink-mute);margin-top:4px;">
+              ${esc(center.type)} · ${esc(center.address)}
+            </p>
+          </div>
+        </div>
 
         <!-- Walk / Transit stat grid -->
         <div class="stat-grid mt-18">
@@ -344,6 +353,7 @@
               <span class="minutes">${c.walkMin}</span>
               <span class="unit">min</span>
             </div>
+            <div class="center-type-icon">${typeIcon(c.type)}</div>
             <div style="flex:1;min-width:0;">
               <div style="font-size:1.0625rem;font-weight:700;color:var(--color-ink);
                           letter-spacing:-0.01em;line-height:1.2;">${esc(c.name)}</div>

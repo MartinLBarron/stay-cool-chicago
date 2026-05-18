@@ -58,8 +58,13 @@
         <!-- Status + name + type -->
         <div class="detail-header">
           <div id="status-chip"></div>
-          <h1 id="detail-name" class="detail-name"></h1>
-          <p  id="detail-type" class="text-caption mute" style="margin-top:5px;"></p>
+          <div class="detail-name-row">
+            <div id="detail-type-icon" class="detail-type-icon"></div>
+            <div>
+              <h1 id="detail-name" class="detail-name"></h1>
+              <p  id="detail-type" class="text-caption mute" style="margin-top:5px;"></p>
+            </div>
+          </div>
         </div>
 
         <!-- Address (tappable → map view) -->
@@ -144,6 +149,7 @@
              computeTravelTimes, isOpenNow,
              closingTimeLabel, openingTimeLabel }    from '/js/data.js';
     import { getDirectionsURLs, getLocationURL }      from '/js/directions.js';
+    import { typeIcon }                               from '/js/icons.js';
     import copy                                      from '/js/copy.js';
 
     const lang = initLang('lang-toggle');
@@ -233,6 +239,7 @@
       } catch {}
 
       // ── Name & type ──────────────────────────────────────────────
+      document.getElementById('detail-type-icon').innerHTML = typeIcon(center.type, 40);
       document.getElementById('detail-name').textContent = center.name;
       document.getElementById('detail-type').textContent = center.type || '';
       document.title = center.name;

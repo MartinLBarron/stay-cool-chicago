@@ -33,6 +33,16 @@
 
     <main id="main">
       <div id="map" role="application" aria-label="Map of Chicago cooling centers"></div>
+      <div id="map-legend" class="map-legend" aria-hidden="true">
+        <span class="map-legend-item">
+          <span class="map-pin map-pin--open map-legend-pin"></span>
+          <span data-i18n="legendOpen">Open</span>
+        </span>
+        <span class="map-legend-item">
+          <span class="map-pin map-pin--closed map-legend-pin"></span>
+          <span data-i18n="legendClosed">Closed</span>
+        </span>
+      </div>
       <button id="locate-btn" class="locate-btn"
               data-i18n-aria-label="locateMe" aria-label="Locate me">
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true" focusable="false">
@@ -64,6 +74,7 @@
     import { fetchCenters, sortByDistance, isOpenNow,
              closingTimeLabel }                                   from '/js/data.js';
     import { getDirectionsURLs }                                  from '/js/directions.js';
+    import { typeIcon, typeColor }                                from '/js/icons.js';
     import copy                                                   from '/js/copy.js';
 
     const lang = initLang('lang-toggle');
@@ -107,12 +118,16 @@
         .replace(/"/g, '&quot;');
     }
 
-    function makePinIcon(isOpen) {
+    function makePinIcon(center, isOpen) {
+      const style = isOpen
+        ? `background:${typeColor(center.type)};border-color:${typeColor(center.type)};`
+        : '';
+      const cls = isOpen ? 'map-type-pin map-type-pin--open' : 'map-type-pin map-type-pin--closed';
       return L.divIcon({
-        html: `<div class="${isOpen ? 'map-pin map-pin--open' : 'map-pin map-pin--closed'}"></div>`,
-        className: '',
-        iconSize:   [24, 24],
-        iconAnchor: [12, 12],
+        html:       `<div class="${cls}" style="${style}">${typeIcon(center.type, 18)}</div>`,
+        className:  '',
+        iconSize:   [34, 34],
+        iconAnchor: [17, 17],
       });
     }
 
@@ -154,8 +169,15 @@
               ${chipHtml}
               ${metaHtml ? `<span class="text-caption mute">${metaHtml}</span>` : ''}
             </div>
-            <p class="map-card-name">${esc(center.name)}</p>
-            <p class="map-card-sub">${esc(center.address)}</p>
+            <div style="display:flex;align-items:flex-start;gap:10px;margin-top:8px;">
+              <div style="flex-shrink:0;color:var(--color-ink-mute);padding-top:1px;">
+                ${typeIcon(center.type, 30)}
+              </div>
+              <div>
+                <p class="map-card-name">${esc(center.name)}</p>
+                <p class="map-card-sub">${esc(center.address)}</p>
+              </div>
+            </div>
           </a>
           <div class="map-card-actions">
             <a href="${esc(dirUrl)}"
@@ -186,8 +208,9 @@
     }
 
     function renderTapPrompt() {
+      const t = copy[getLang()];
       document.getElementById('bottom-sheet').innerHTML =
-        '<p class="text-caption mute" style="text-align:center;padding:22px 20px;" data-i18n="nearestCenter">Nearest open center</p>';
+        `<p class="text-caption mute" style="text-align:center;padding:22px 20px;">${esc(t.tapPrompt)}</p>`;
     }
 
     // ── Advisory banner resize → invalidate map ────────────────────────
@@ -255,7 +278,7 @@
       sorted.forEach(center => {
         const isOpen = isOpenNow(center.hoursToday);
         const marker = L.marker([center.lat, center.lng], {
-          icon:        makePinIcon(isOpen),
+          icon:        makePinIcon(center, isOpen),
           title:       center.name,
           riseOnHover: true,
           keyboard:    true,
@@ -275,11 +298,9 @@
         map.fitBounds(bounds, { padding: [48, 48], maxZoom: 14 });
       }
 
-      // Bottom sheet default
-      const nearestOpen = sorted.find(c => isOpenNow(c.hoursToday));
-      if (nearestOpen)         renderBottomSheet(nearestOpen);
-      else if (!openCount)     renderNoOpen();
-      else                     renderTapPrompt();
+      // Bottom sheet default — nothing selected until user taps a pin
+      if (!openCount)  renderNoOpen();
+      else             renderTapPrompt();
 
       // Let layout settle, then fix tile rendering
       setTimeout(() => map.invalidateSize(), 80);
@@ -297,8 +318,9 @@
           document.getElementById('open-count').textContent =
             `${openCount} ${t.centersOpen}`;
         }
-        if (selectedCenter) renderBottomSheet(selectedCenter);
+        if (selectedCenter)  renderBottomSheet(selectedCenter);
         else if (!openCount) renderNoOpen();
+        else                 renderTapPrompt();
       });
     });
   </script>

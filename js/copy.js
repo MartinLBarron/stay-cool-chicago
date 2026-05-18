@@ -21,9 +21,11 @@ const copy = {
     welcomeHeadline: 'Free places to cool down, near you.',
     welcomeSub: 'Free, air-conditioned places to rest and hydrate — open across Chicago.',
     findNearest: 'Find nearest cooling center',
-    findNearestSub: 'Uses your location',
+    findNearestSub: 'Uses your location. Includes Spray Features',
+    findNearestIndoor: 'Find nearest indoor cooling center',
+    findNearestIndoorSub: 'Uses your location',
     searchCenter:    'Search for cooling center',
-    searchCenterSub: 'By address or neighborhood',
+    searchCenterSub: 'By address, zip, or landmark',
     viewMap: 'See all cooling centers',
     viewMapSub: '280+ locations across the city',
     needRide: 'Need assistance? Call 311',
@@ -51,7 +53,7 @@ const copy = {
 
     // Search screen
     searchHeadline: 'Where are you?',
-    searchSub: 'Type a street, ZIP, or pick a neighborhood.',
+    searchSub: 'Type a street address or ZIP code.',
     searchPlaceholder: 'Street, ZIP code, or landmark',
     searchBtn: 'Search',
     searching: 'Searching…',
@@ -63,6 +65,9 @@ const copy = {
     mapTitle: 'Cooling centers',
     centersOpen: 'open now',
     nearestCenter: 'Nearest open center',
+    tapPrompt: 'Tap a pin to see details',
+    legendOpen: 'Open',
+    legendClosed: 'Closed',
     locateMe: 'Locate me',
 
     // List screen
@@ -125,9 +130,11 @@ const copy = {
     welcomeHeadline: 'Lugares gratis para refrescarte, cerca de ti.',
     welcomeSub: 'Lugares con aire acondicionado para descansar e hidratarse, abiertos en todo Chicago.',
     findNearest: 'Encontrar centro más cercano',
-    findNearestSub: 'Usa tu ubicación',
+    findNearestSub: 'Usa tu ubicación. Incluye Fuentes de Agua',
+    findNearestIndoor: 'Encontrar centro interior más cercano',
+    findNearestIndoorSub: 'Usa tu ubicación',
     searchCenter:    'Buscar centro de enfriamiento',
-    searchCenterSub: 'Por dirección o vecindario',
+    searchCenterSub: 'Por dirección, código postal o lugar',
     viewMap: 'Ver todos los centros',
     viewMapSub: 'Más de 280 lugares en la ciudad',
     needRide: '¿Necesita ayuda? Llame al 311',
@@ -155,7 +162,7 @@ const copy = {
 
     // Search screen
     searchHeadline: '¿Dónde estás?',
-    searchSub: 'Escribe una calle, código postal o elige un barrio.',
+    searchSub: 'Escribe una calle o código postal.',
     searchPlaceholder: 'Calle, código postal o lugar',
     searchBtn: 'Buscar',
     searching: 'Buscando…',
@@ -168,6 +175,9 @@ const copy = {
     mapTitle: 'Centros de enfriamiento',
     centersOpen: 'abiertos ahora',
     nearestCenter: 'Centro abierto más cercano',
+    tapPrompt: 'Toca un marcador para ver detalles',
+    legendOpen: 'Abierto',
+    legendClosed: 'Cerrado',
     locateMe: 'Mi ubicación',
 
     // List screen

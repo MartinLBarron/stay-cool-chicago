@@ -358,6 +358,16 @@ h3 { font-size: 1.0625rem; font-weight: 700; line-height: 1.2; }
   margin-top: 3px;
 }
 
+.center-type-icon {
+  width: 44px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 1px;
+  color: var(--color-ink-mute);
+}
+
 /* ── Page header ─────────────────────────────────────────────────────────── */
 .page-header {
   display: flex;
@@ -628,12 +638,24 @@ h3 { font-size: 1.0625rem; font-weight: 700; line-height: 1.2; }
   border-bottom: 1px solid var(--color-hair);
 }
 
+.detail-name-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.detail-type-icon {
+  flex-shrink: 0;
+  color: var(--color-ink-mute);
+  padding-top: 3px;
+}
+
 .detail-name {
   font-size: 1.5rem;
   font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1.15;
-  margin-top: 10px;
 }
 
 .detail-address-link {
@@ -748,6 +770,34 @@ h3 { font-size: 1.0625rem; font-weight: 700; line-height: 1.2; }
 .map-pin--open   { background: var(--color-ink); }
 .map-pin--closed { background: var(--color-paper); border-color: var(--color-hair); }
 
+.map-type-pin {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 2px solid var(--color-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.12s;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(10,42,85,0.25);
+}
+
+.map-type-pin:hover,
+.map-type-pin:focus { transform: scale(1.2); }
+
+.map-type-pin--open {
+  background: var(--color-ink);
+  color: var(--color-paper);
+}
+
+.map-type-pin--closed {
+  background: var(--color-paper);
+  color: var(--color-ink-mute);
+  border-color: var(--color-hair);
+  opacity: 0.6;
+}
+
 .map-user-dot {
   width: 16px;
   height: 16px;
@@ -761,6 +811,41 @@ h3 { font-size: 1.0625rem; font-weight: 700; line-height: 1.2; }
 @keyframes pulse-dot {
   0%, 100% { box-shadow: 0 0 0 2px rgba(65, 200, 118, 0.9); }
   50%       { box-shadow: 0 0 0 8px rgba(65, 200, 118, 0); }
+}
+
+/* ── Map legend (overlaid bottom-left) ──────────────────────────────────── */
+.map-legend {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  z-index: 1000;
+  background: var(--color-paper);
+  border: 1.5px solid var(--color-ink);
+  border-radius: 8px;
+  padding: 6px 10px;
+  display: flex;
+  gap: 14px;
+  box-shadow: 0 2px 8px rgba(10, 42, 85, 0.2);
+  pointer-events: none;
+}
+
+.map-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--color-ink);
+}
+
+.map-legend-pin {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  cursor: default;
+  transition: none;
 }
 
 /* ── Locate-me button (overlaid on map) ──────────────────────────────────── */
