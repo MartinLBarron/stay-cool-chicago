@@ -269,13 +269,13 @@
         <div class="stat-grid mt-18">
           <div class="stat">
             <div class="stat-label">${esc(distStr)}</div>
-            <div class="stat-value">${center.walkMin}
+            <div class="stat-value">~${center.walkMin}
               <span class="stat-unit">${esc(t.minWalk)}</span>
             </div>
           </div>
           <div class="stat">
             <div class="stat-label">${esc(t.transit)}</div>
-            <div class="stat-value">${center.transitMin}
+            <div class="stat-value">~${center.transitMin}
               <span class="stat-unit">${esc(t.minTransit)}</span>
             </div>
           </div>
@@ -348,9 +348,9 @@
         const subtitle = `${esc(c.type)}${closing ? ' · ' + esc(t.openUntil) + ' ' + esc(closing) : ''}`;
         return `
           <a href="center.html?id=${encodeURIComponent(c.id)}" class="center-row"
-             aria-label="${esc(c.name)}, ${c.walkMin} ${esc(t.minWalk)}">
+             aria-label="${esc(c.name)}, ~${c.walkMin} ${esc(t.minWalk)}">
             <div class="walk-time">
-              <span class="minutes">${c.walkMin}</span>
+              <span class="minutes">~${c.walkMin}</span>
               <span class="unit">min</span>
             </div>
             <div class="center-type-icon">${typeIcon(c.type)}</div>

@@ -296,8 +296,8 @@
       const times    = computeTravelTimes(userLat, userLng, center.lat, center.lng);
       const statsRow = document.getElementById('stats-row');
       if (times) {
-        document.getElementById('stat-walk').textContent    = times.walkMin;
-        document.getElementById('stat-transit').textContent = times.transitMin;
+        document.getElementById('stat-walk').textContent    = '~' + times.walkMin;
+        document.getElementById('stat-transit').textContent = '~' + times.transitMin;
         statsRow.hidden = false;
       } else {
         statsRow.hidden = true;

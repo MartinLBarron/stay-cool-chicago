@@ -319,8 +319,8 @@
         const statusColor = open ? 'var(--color-open-dot)' : 'var(--color-ink-mute)';
 
         const leftCol = hasLocation
-          ? `<div class="walk-time" aria-label="${c.walkMin} ${t.minWalk}">
-               <span class="minutes">${c.walkMin}</span>
+          ? `<div class="walk-time" aria-label="~${c.walkMin} ${t.minWalk}">
+               <span class="minutes">~${c.walkMin}</span>
                <span class="unit">min</span>
              </div>`
           : '';
@@ -328,7 +328,7 @@
         return `
           <a href="center.html?id=${encodeURIComponent(c.id)}"
              class="center-row" role="listitem"
-             aria-label="${esc(c.name)}${hasLocation ? ', ' + c.walkMin + ' ' + t.minWalk : ''}">
+             aria-label="${esc(c.name)}${hasLocation ? ', ~' + c.walkMin + ' ' + t.minWalk : ''}">
             ${leftCol}
             <div class="center-type-icon">${typeIcon(c.type)}</div>
             <div style="flex:1;min-width:0;">
