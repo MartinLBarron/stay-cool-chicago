@@ -1,7 +1,7 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
 
-$cacheFile = __DIR__ . '/../cache/advisory.json';
+$cacheFile = __DIR__ . '/../../cache/advisory.json';
 $cacheTTL  = 600; // 10 minutes
 
 if (file_exists($cacheFile) && (time() - filemtime($cacheFile)) < $cacheTTL) {

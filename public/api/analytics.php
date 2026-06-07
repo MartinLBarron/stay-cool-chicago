@@ -3,7 +3,7 @@ date_default_timezone_set('America/Chicago');
 header('Content-Type: application/json');
 header('Cache-Control: no-store');
 
-define('DATA_FILE', __DIR__ . '/../data/analytics.json');
+define('DATA_FILE', __DIR__ . '/../../data/analytics.json');
 define('MAX_DAYS',  90);
 
 $method = $_SERVER['REQUEST_METHOD'];

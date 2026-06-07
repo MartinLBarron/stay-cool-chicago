@@ -2,7 +2,7 @@
 date_default_timezone_set('America/Chicago');
 header('Content-Type: application/json; charset=utf-8');
 
-$cacheFile    = __DIR__ . '/../cache/centers.json';
+$cacheFile    = __DIR__ . '/../../cache/centers.json';
 $fallbackFile = __DIR__ . '/../data/centers-fallback.json';
 $cacheTTL     = 300; // 5 minutes
 

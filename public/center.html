@@ -7,6 +7,7 @@
   <meta name="description" content="Cooling center hours, directions, and amenities." />
   <meta name="theme-color" content="#0a2a55" />
   <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="/assets/icons/favicon.svg" />
   <link rel="icon" type="image/png" href="/assets/icons/favicon-32.png" sizes="32x32" />
   <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png" />
   <link rel="stylesheet" href="css/main.css" />
@@ -22,13 +23,10 @@
 
     <header class="page-header" style="padding:12px var(--page-pad);border-bottom:1px solid var(--color-hair);">
       <a class="brand-mark" href="index.html" aria-label="Stay Cool Chicago — home">
-        <svg width="22" height="22" viewBox="0 0 28 28" aria-hidden="true" focusable="false">
-          <rect x="2" y="2" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"/>
-          <circle cx="14" cy="14" r="5" fill="none" stroke="currentColor" stroke-width="2"/>
-          <line x1="14" y1="4"  x2="14" y2="7"  stroke="currentColor" stroke-width="2" stroke-linecap="square"/>
-          <line x1="14" y1="21" x2="14" y2="24" stroke="currentColor" stroke-width="2" stroke-linecap="square"/>
-          <line x1="4"  y1="14" x2="7"  y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="square"/>
-          <line x1="21" y1="14" x2="24" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="square"/>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+          <path d="M12 2V18M12 22V18M12 18L15 21M12 18L9 21M15 3L12 6L9 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M3.33978 7.00042L6.80389 9.00042M6.80389 9.00042L17.1962 15.0004M6.80389 9.00042L5.70581 4.90234M6.80389 9.00042L2.70581 10.0985M17.1962 15.0004L20.6603 17.0004M17.1962 15.0004L21.2943 13.9023M17.1962 15.0004L18.2943 19.0985" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M20.66 7.00042L17.1959 9.00042M17.1959 9.00042L6.80364 15.0004M17.1959 9.00042L18.294 4.90234M17.1959 9.00042L21.294 10.0985M6.80364 15.0004L3.33954 17.0004M6.80364 15.0004L2.70557 13.9023M6.80364 15.0004L5.70557 19.0985" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
         </svg>
         <span class="brand-name" data-i18n="appName">Stay Cool Chicago</span>
       </a>
@@ -100,15 +98,15 @@
              style="padding:0 var(--page-pad) 16px;font-size:0.875rem;color:var(--color-ink-mute);font-style:italic;">
         </div>
 
-        <!-- Walk / transit stats (only when user has location) -->
+        <!-- Walk / drive stats (only when user has location) -->
         <div id="stats-row" hidden class="stat-grid" style="margin:0 var(--page-pad);">
           <div class="stat">
             <p class="stat-label" data-i18n="minWalk">min walk</p>
-            <p class="stat-value" id="stat-walk">—</p>
+            <p class="stat-value" id="stat-walk">…</p>
           </div>
           <div class="stat">
-            <p class="stat-label" data-i18n="minTransit">min by transit</p>
-            <p class="stat-value" id="stat-transit">—</p>
+            <p class="stat-label" data-i18n="minDrive">min drive</p>
+            <p class="stat-value" id="stat-drive">…</p>
           </div>
         </div>
 
@@ -146,7 +144,7 @@
     import { initLang, getLang, getCopy, applyLang } from '/js/lang.js';
     import { initAdvisory }                          from '/js/advisory.js';
     import { fetchCenters, fetchAmenities,
-             computeTravelTimes, isOpenNow,
+             fetchSingleRouteTimes, isOpenNow,
              closingTimeLabel, openingTimeLabel }    from '/js/data.js';
     import { getDirectionsURLs, getLocationURL }      from '/js/directions.js';
     import { typeIcon }                               from '/js/icons.js';
@@ -290,15 +288,16 @@
       L.marker([center.lat, center.lng]).addTo(miniMap);
       setTimeout(() => miniMap.invalidateSize(), 50);
 
-      // ── Walk / transit ───────────────────────────────────────────
+      // ── Walk / drive ─────────────────────────────────────────────
       const userLat  = parseFloat(sessionStorage.getItem('userLat') || '');
       const userLng  = parseFloat(sessionStorage.getItem('userLng') || '');
-      const times    = computeTravelTimes(userLat, userLng, center.lat, center.lng);
       const statsRow = document.getElementById('stats-row');
-      if (times) {
-        document.getElementById('stat-walk').textContent    = '~' + times.walkMin;
-        document.getElementById('stat-transit').textContent = '~' + times.transitMin;
+      if (!isNaN(userLat) && !isNaN(userLng)) {
         statsRow.hidden = false;
+        fetchSingleRouteTimes(userLat, userLng, center.lat, center.lng).then(times => {
+          if (times?.walkMin  != null) document.getElementById('stat-walk').textContent  = times.walkMin;
+          if (times?.driveMin != null) document.getElementById('stat-drive').textContent = times.driveMin;
+        });
       } else {
         statsRow.hidden = true;
       }

@@ -1,8 +1,10 @@
 // Data-fetching layer.
 // All other modules import from here — nothing calls the PHP endpoints directly.
 
-const WALK_PACE_MPH = 3.0; // ~20 min/mile, conservative for elderly users
-const MILES_PER_DEGREE_LAT = 69.0;
+// router.project-osrm.org silently returns car times for all profiles, so we
+// use routing.openstreetmap.de which has separate foot and car datasets.
+const OSRM_FOOT  = 'https://routing.openstreetmap.de/routed-foot';
+const OSRM_DRIVE = 'https://routing.openstreetmap.de/routed-car';
 
 // ── Public API ────────────────────────────────────────────────────────────────
 
@@ -30,32 +32,63 @@ export async function fetchAmenities() {
 }
 
 /**
- * Compute walk/transit times from a user location to a single center.
- * Returns null if either position is missing.
- */
-export function computeTravelTimes(userLat, userLng, centerLat, centerLng) {
-  if (!userLat || !userLng || !centerLat || !centerLng) return null;
-  const distMi     = haversineMiles(userLat, userLng, centerLat, centerLng);
-  const walkMin    = Math.round((distMi / WALK_PACE_MPH) * 60);
-  const transitMin = Math.round(walkMin * 0.6);
-  return { distMi, walkMin, transitMin };
-}
-
-/**
  * Sort centers by straight-line distance from userLat/userLng.
- * Attaches walkMin and transitMin to each center object.
+ * walkMin and driveMin are left unset — call fetchTableTimes() to populate them.
  */
 export function sortByDistance(centers, userLat, userLng) {
   return centers
     .filter(c => c.lat && c.lng)
     .map(c => {
       const distMi = haversineMiles(userLat, userLng, c.lat, c.lng);
-      const walkMin = Math.round((distMi / WALK_PACE_MPH) * 60);
-      // Transit is estimated as 60% of walk time (accounts for wait + speed)
-      const transitMin = Math.round(walkMin * 0.6);
-      return { ...c, distMi, walkMin, transitMin };
+      return { ...c, distMi };
     })
     .sort((a, b) => a.distMi - b.distMi);
+}
+
+/**
+ * Fetch real walk and drive times for a list of centers using the OSRM table API.
+ * Mutates each center in-place with updated walkMin and driveMin.
+ * Falls back to existing haversine estimates on error.
+ */
+export async function fetchTableTimes(userLat, userLng, centers) {
+  if (!centers.length) return;
+  const src    = `${userLng},${userLat}`;
+  const dsts   = centers.map(c => `${c.lng},${c.lat}`).join(';');
+  const dstIdx = centers.map((_, i) => i + 1).join(';');
+  const coords = `${src};${dsts}`;
+  try {
+    const [wRes, dRes] = await Promise.all([
+      fetch(`${OSRM_FOOT}/table/v1/foot/${coords}?sources=0&destinations=${dstIdx}`),
+      fetch(`${OSRM_DRIVE}/table/v1/driving/${coords}?sources=0&destinations=${dstIdx}`),
+    ]);
+    const [wData, dData] = await Promise.all([wRes.json(), dRes.json()]);
+    const wDurs = wData.code  === 'Ok' ? wData.durations[0]  : null;
+    const dDurs = dData.code === 'Ok' ? dData.durations[0] : null;
+    centers.forEach((c, i) => {
+      if (wDurs?.[i] != null) c.walkMin  = Math.round(wDurs[i]  / 60);
+      if (dDurs?.[i] != null) c.driveMin = Math.round(dDurs[i] / 60);
+    });
+  } catch { /* keep haversine estimates */ }
+}
+
+/**
+ * Fetch real walk and drive times for a single origin→center pair via OSRM route API.
+ * Returns { walkMin, driveMin } or null on failure.
+ */
+export async function fetchSingleRouteTimes(userLat, userLng, centerLat, centerLng) {
+  if (!userLat || !userLng || !centerLat || !centerLng) return null;
+  const coords = `${userLng},${userLat};${centerLng},${centerLat}`;
+  try {
+    const [wRes, dRes] = await Promise.all([
+      fetch(`${OSRM_FOOT}/route/v1/foot/${coords}?overview=false`),
+      fetch(`${OSRM_DRIVE}/route/v1/driving/${coords}?overview=false`),
+    ]);
+    const [wData, dData] = await Promise.all([wRes.json(), dRes.json()]);
+    return {
+      walkMin:  wData.code  === 'Ok' ? Math.round(wData.routes[0].duration  / 60) : null,
+      driveMin: dData.code === 'Ok' ? Math.round(dData.routes[0].duration / 60) : null,
+    };
+  } catch { return null; }
 }
 
 /**

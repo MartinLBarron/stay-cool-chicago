@@ -11,7 +11,7 @@ if (isset($_GET['logout'])) {
     exit;
 }
 
-$cfg = __DIR__ . '/.admin-credentials';
+$cfg = __DIR__ . '/../.admin-credentials';
 if (!file_exists($cfg)) {
     http_response_code(503);
     exit('Admin not configured. Visit admin-setup.php first.');
